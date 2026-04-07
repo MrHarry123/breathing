@@ -44,7 +44,22 @@
   let running = false;
   let cancelled = false;
 
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function beep() {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 440;
+    gain.gain.value = 0.3;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+    osc.stop(audioCtx.currentTime + 0.15);
+  }
+
   function vibrate() {
+    beep();
     if (navigator.vibrate) navigator.vibrate(100);
   }
 
@@ -75,6 +90,7 @@
     vibrate();
     dot.classList.remove('expanded');
     await sleep(5000);
+    if (!cancelled) beep();
   }
 
   async function start() {
