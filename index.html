@@ -95,6 +95,7 @@
 
   async function start() {
     if (running) { reset(); return; }
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
     running = true;
     cancelled = false;
 
