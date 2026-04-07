@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Breathe">
+<meta name="theme-color" content="#000000">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<title>Breathe</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  #dot {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #D1FAFF;
+    cursor: pointer;
+    transition: width 5s linear, height 5s linear, background-color 5s linear;
+  }
+  #dot.expanded {
+    width: 200px;
+    height: 200px;
+    background: #11BCFF;
+  }
+</style>
+</head>
+<body>
+<div id="dot"></div>
+<script>
+  const dot = document.getElementById('dot');
+  let running = false;
+  let cancelled = false;
+
+  function vibrate() {
+    if (navigator.vibrate) navigator.vibrate(100);
+  }
+
+  function sleep(ms) {
+    return new Promise(r => {
+      const id = setTimeout(r, ms);
+      sleepTimer = id;
+    });
+  }
+
+  let sleepTimer = null;
+
+  function reset() {
+    cancelled = true;
+    clearTimeout(sleepTimer);
+    dot.classList.remove('expanded');
+    // Remove transition briefly so it snaps back instantly
+    dot.style.transition = 'none';
+    dot.offsetWidth;
+    dot.style.transition = '';
+    running = false;
+  }
+
+  async function cycle() {
+    dot.classList.add('expanded');
+    await sleep(5000);
+    if (cancelled) return;
+    vibrate();
+    dot.classList.remove('expanded');
+    await sleep(5000);
+  }
+
+  async function start() {
+    if (running) { reset(); return; }
+    running = true;
+    cancelled = false;
+
+    for (let i = 0; i < 3; i++) {
+      await cycle();
+      if (cancelled) return;
+    }
+
+    running = false;
+  }
+
+  dot.addEventListener('click', start);
+</script>
+</body>
+</html>
